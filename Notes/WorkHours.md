@@ -10,10 +10,20 @@
 
 ## Period 1
 
-### 2014-08-27 3:47-
+### 2014-08-27 3:47-4:28
 
 - Create Notes
 - Restart git
+	- Create github project
+	- Create good git ignore
+	- Setup Unity to force text asset files
+	- Add existing files
+	- Push to github
+
+### 4:29-
+
+- Improve Base Editor:
+- Snap to even when piece placed
 
 
 # TODO
