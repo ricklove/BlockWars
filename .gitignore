@@ -1,3 +1,6 @@
+AssetsUnused/
+Builds/
+
 # =============== #
 # Unity generated #
 # =============== #
@@ -76,3 +79,24 @@ Icon
 # Files that might appear on external disk
 .Spotlight-V100
 .Trashes
+
+#Ignore files build by Visual Studio
+*.user
+*.aps
+*.pch
+*.vspscc
+*_i.c
+*_p.c
+*.ncb
+*.suo
+*.bak
+*.cache
+*.ilk
+*.log
+[Bb]in
+[Dd]ebug*/
+*.sbr
+obj/
+[Rr]elease*/
+_ReSharper*/
+*.lnk
