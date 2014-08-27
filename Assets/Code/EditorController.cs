@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System;
+using System.Linq;
 
 public class EditorController : MonoBehaviour
 {
@@ -557,9 +558,10 @@ public class EditorController : MonoBehaviour
 
 
                         // Remove from blocks to place
-                        if (_blocksToBalance.Contains(blockAttachedToCrane))
+                        var bb = _blocksToBalance.Where(b => blockAttachedToCrane == b.Block).FirstOrDefault();
+                        if (bb != null)
                         {
-                            _blocksToBalance.Remove(blockAttachedToCrane);
+                            _blocksToBalance.Remove(bb);
                         }
                     }
 
@@ -628,35 +630,98 @@ public class EditorController : MonoBehaviour
         }
     }
 
-    private List<GameObject> _blocksToBalance = new List<GameObject>();
+    private List<BlockBalance> _blocksToBalance = new List<BlockBalance>();
 
     private void BalancePlacedBlock(GameObject block)
     {
-        _blocksToBalance.Add(block);
+        _blocksToBalance.Add(new BlockBalance(block));
+    }
+
+    private bool _soYouCanDance = false;
+
+    public class BlockBalance
+    {
+        public GameObject Block { get; set; }
+
+        public bool isFrozen { get; set; }
+        public Vector3 lastPosition { get; set; }
+
+        public BlockBalance(GameObject block)
+        {
+            Block = block;
+        }
     }
 
     private void BalancePlacedBlocks()
     {
-        // Rotate to an even rotation %15 degrees
-        var rotationMod = 180.0f / 6.0f;
+        var blocksNotDone = new List<BlockBalance>();
 
-        foreach (var block in _blocksToBalance)
+        foreach (var blockBalance in _blocksToBalance)
         {
-            var lRotation = block.transform.localEulerAngles;
+            var block = blockBalance.Block;
 
-            var ex = Mathf.Round((int)(lRotation.x / rotationMod)) * rotationMod;
-            var ey = Mathf.Round((int)(lRotation.y / rotationMod)) * rotationMod;
-            var ez = Mathf.Round((int)(lRotation.z / rotationMod)) * rotationMod;
+            if (block == null)
+            {
+                continue;
+            }
 
-            block.transform.localEulerAngles = new Vector3(ex, ey, ez);
+            if (!block.activeSelf)
+            {
+                continue;
+            }
 
-            //block.transform.localPosition = new Vector3(x, y, z);
+            if (blockBalance.isFrozen)
+            {
+                continue;
+            }
+
+            // BREAKDANCE BUG
+            if (_soYouCanDance)
+            {
+                var rotationMod = 180.0f / 6.0f;
+
+                var lRotation = block.transform.localEulerAngles;
+
+                var ex = Mathf.Round((int)(lRotation.x / rotationMod)) * rotationMod;
+                var ey = Mathf.Round((int)(lRotation.y / rotationMod)) * rotationMod;
+                var ez = Mathf.Round((int)(lRotation.z / rotationMod)) * rotationMod;
+
+                block.transform.localEulerAngles = new Vector3(ex, ey, ez);
+            }
+            else
+            {
+                // Rotate to an even rotation %15 degrees
+                var rotationMod = 180.0f / 12.0f;
+
+                var lRotation = block.transform.localEulerAngles;
+
+                var ex = Mathf.Round(lRotation.x / rotationMod) * rotationMod;
+                var ey = Mathf.Round(lRotation.y / rotationMod) * rotationMod;
+                var ez = Mathf.Round(lRotation.z / rotationMod) * rotationMod;
+
+                block.transform.localEulerAngles = new Vector3(ex, ey, ez);
+            }
+
+            var pos = block.transform.localPosition;
+            var change = Vector3.Distance(pos, blockBalance.lastPosition);
+            blockBalance.lastPosition = pos;
+
+            if (change > 0 && change < 0.001)
+            {
+                // Freeze when balanced
+                var blockRigidbody = block.GetComponent<Rigidbody>();
+                blockRigidbody.constraints = RigidbodyConstraints.FreezeAll;
+                blockBalance.isFrozen = true;
+            }
+            else
+            {
+                blocksNotDone.Add(blockBalance);
+            }
         }
 
+        _blocksToBalance.Clear();
+        _blocksToBalance = blocksNotDone;
 
-        //// Freeze when balanced
-        //var blockRigidbody = blockAttachedToCrane.GetComponent<Rigidbody>();
-        //blockRigidbody.constraints = RigidbodyConstraints.FreezeAll;
     }
 
     private Vector3 GetCranePosition()
