@@ -327,6 +327,12 @@ public class EditorController : MonoBehaviour
                     loadedBaseIndex = selectedIndex;
 
                     showLoadList = false;
+
+                    // Balance loaded blocks
+                    foreach (Transform block in baseObject.transform)
+                    {
+                        BalancePlacedBlock(block.gameObject);
+                    }
                 }
 
                 //foreach (var name in baseNames)
@@ -493,6 +499,9 @@ public class EditorController : MonoBehaviour
 
                     // Anything but the editorHeightPlane
                     var layerMask = 1 << Consts.mouseHeightPlaneLayerNumber;
+                    var layerMask2 = 1 << Consts.ignoreRaycastLayerNumber;
+                    layerMask = layerMask | layerMask2;
+
                     layerMask = ~layerMask;
 
                     Debug.DrawLine(centerScreenPointB, GetMouseEditorPosition(), Color.red, 3);
@@ -551,6 +560,21 @@ public class EditorController : MonoBehaviour
                         // Attach spring
                         var sJoint = editorCrane.GetComponent<SpringJoint>();
                         sJoint.connectedBody = blockRigidbody;
+
+
+                        sJoint.anchor = new Vector3();
+                        sJoint.connectedAnchor = new Vector3();
+
+                        // Floating the anchor helps
+                        var baseAnchor = new Vector3(0, -1f, 0);
+                        var offsetAnchor = new Vector3(0, 0, 0.5f);
+                        var offsetConnected = new Vector3(0, 0, 0);
+                        //var offsetConnected = new Vector3(-0.1f, 0, 0.5f);
+
+                        sJoint.anchor = new Vector3(baseAnchor.x + offsetAnchor.x, baseAnchor.y + offsetAnchor.y, baseAnchor.z + offsetAnchor.z); ;
+                        sJoint.connectedAnchor = new Vector3(baseAnchor.x + offsetConnected.x, baseAnchor.y + offsetConnected.y, baseAnchor.z + offsetConnected.z); ;
+
+
                         blockRigidbody.constraints =
                           RigidbodyConstraints.FreezeRotationX |
                           RigidbodyConstraints.FreezeRotationZ |
@@ -698,6 +722,10 @@ public class EditorController : MonoBehaviour
                 var ex = Mathf.Round(lRotation.x / rotationMod) * rotationMod;
                 var ey = Mathf.Round(lRotation.y / rotationMod) * rotationMod;
                 var ez = Mathf.Round(lRotation.z / rotationMod) * rotationMod;
+
+                //// Only allow flat rotation
+                //ex = 0;
+                //ez = 0;
 
                 block.transform.localEulerAngles = new Vector3(ex, ey, ez);
             }

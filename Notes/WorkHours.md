@@ -20,20 +20,17 @@
 	- Add existing files
 	- Push to github
 
-### 4:29-
+### 4:29-6:26
 
 - Improve Base Editor:
 - Snap to even when piece placed
+- Balance out forces between pieces before freezing piece
+- Freeze pieces on load
 
+### 6:27-6:45
+
+- Offset crane
 
 # TODO
-
-- Restart git because of many large binary files in history
-
-- Editor Improvements
-	- Snap to even when piece placed
-		- Rotation (0,%15,0)
-	- Balance out forces between pieces before freezing piece
-	- Freeze pieces on load
 
 		
